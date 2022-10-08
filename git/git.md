@@ -7,7 +7,8 @@ Command  | Description
 |`$> git branch -v -a \|\| git fetch` <br> `$> git fetch --all --prune`| it shows all branches available for checkout --all update local with remote data --prune clean deleted branch|
 |`$> git checkout brancheName`|Switch with branches|
 |`$> git checkout -b branch-name origin/branch-name`|Checkout remote branch|
-|`$> git branch`<br>`$> git for-each-ref --format='%(if)%(authorname)%(then)%(authorname)%(end): %(refname)' --sort=authorname`|Show branches localList branches remote and local with author|
+|`$> git branch`|Show branches local|
+|`$> git for-each-ref --format='%(if)%(authorname)%(then)%(authorname)%(end): %(refname)' --sort=authorname`|List branches remote and local with author|
 |`$> git log -p`|Show history |
 |`$> git push \|\| git push origin/master`|Push (send to repository)|
 |`$> git pull` <br>`$> git pull --rebase`|Pull (update)|
@@ -23,33 +24,8 @@ Command  | Description
 |`$> git diff --cached --diff-filter=ACMR --name-only -- "*.java"`|Show list of files changed |
 |`$> git log branc1..branch2 --pretty=format:"%h%x09%an%x09%ad%x09%s"`|Show difference between two branches  in line with only important information|
 |....|Git branch link|
-
-
-|Git merge feature in master<br> `$> git checkout master` <br> `$> git merge feature` <br>
-'''
-if conflict 
-    To select the changes done in master
-    $> git checkout --ours {file_name or .(all)}
-    To select the changes done in feature
-    $> git checkout --theirs {file_name or .(all)}
-then
-    $> git add {file_name or .(all)}
-    $> git merge --continue '''|Merge easy solve conflict command line|
-|Git Rebase master in feature
-'''$> git checkout feature
-$> git rebase master
-if conflict
-    To select the changes done in master
-    $> git checkout --ours {file_name or .(all)}
-    To select the changes done in feature
-    $> git checkout --theirs {file_name or .(all)}
-then
-    $> git add {file_name or .(all)}
-    $> git rebase --continue'''|Rebase easy solve conflict command line|
-
-
-Command  | Description 
-------------- | -------------
+|Git merge feature in master<br> `$> git checkout master` <br> `$> git merge feature` <br> If conflict <br> #### To select the changes done in master <br> `$> git checkout --ours {file_name or .(all)}` <br> #### To select the changes done in feature <br> `$> git checkout --theirs {file_name or .(all)}` <br> then <br> `$> git add {file_name or .(all)}` <br> `$> git merge --continue` |Merge easy solve conflict command line|
+|Git Rebase master in feature <br>`$> git checkout feature` <br> `$> git rebase master` <br> if conflict <br> To select the changes done in master <br> `$> git checkout --ours {file_name or .(all)}` <br> To select the changes done in feature <br> `$> git checkout --theirs {file_name or .(all)}` <br> then <br> `$> git add {file_name or .(all)}` <br> `$> git rebase --continue` |Rebase easy solve conflict command line| 
 |`$> git config --global alias.st "status"`|Create alias|
 |`$> git stash save -u name_relevante_for_identification`|Create the stash with an identification name |
 |`$> git reset HEAD -- <file or directory>`|If you need to remove a single file from the staging area. Keep the changes|
