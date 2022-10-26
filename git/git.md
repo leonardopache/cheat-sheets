@@ -29,7 +29,7 @@ Command  | Description
 |Git Rebase master in feature <br>`$> git checkout feature` <br> `$> git rebase master` <br> if conflict <br> To select the changes done in master <br> `$> git checkout --ours {file_name or .(all)}` <br> To select the changes done in feature <br> `$> git checkout --theirs {file_name or .(all)}` <br> then <br> `$> git add {file_name or .(all)}` <br> `$> git rebase --continue` |Rebase easy solve conflict command line| 
 |`$> git config --global alias.st "status"`|Create alias|
 |`$> git stash save -u name_relevante_for_identification`|Create the stash with an identification name |
-|`$> git reset HEAD -- <file or directory>`|If you need to remove a single file from the staging area. Keep the changes|
+|`$> git reset HEAD -- <file or directory>`<br> `$> git restore --staged <file or directory>`|If you need to remove a single file from the staging area. Keep the changes|
 |`$> git init`<br>`$> git add . `<br>`$> git commit -m ""`<br>`$> git remote add origin <URL.git>`<br>`$> git branch --set-upstream-to=origin/<branch> <branch>`<br>`$> git pull --rebase` <br> `$> git push`|Push code to new repository|
 |`$> git fetch -p (prune)`|Remove ref for local branch not in remote |
 |`$> git fetch -p && for branch in $(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads \| awk '$2 == "[gone]" {sub("refs/heads/", "", $1); print $1}'); do echo $branch; done`|List all branches not ref. with a remote. <br> To delete the listed, change the echo for a git branch -D command ( git branch -D $branch)|
