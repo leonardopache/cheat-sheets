@@ -8,6 +8,7 @@ Command  | Description
 |`$> git checkout brancheName`|Switch with branches|
 |`$> git checkout -b branch-name origin/branch-name`|Checkout remote branch|
 |`$> git branch`|Show branches local|
+|`$> git branch --delete <branchname>`|Delete branch local|
 |`$> git for-each-ref --format='%(if)%(authorname)%(then)%(authorname)%(end): %(refname)' --sort=authorname`|List branches remote and local with author|
 |`$> git log -p`|Show history |
 |`$> git push \|\| git push origin/master`|Push (send to repository)|
