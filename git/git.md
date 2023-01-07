@@ -28,7 +28,11 @@ Command  | Description
 |Git merge feature in master<br> `$> git checkout master` <br> `$> git merge feature` <br> If conflict <br> #### To select the changes done in master <br> `$> git checkout --ours {file_name or .(all)}` <br> #### To select the changes done in feature <br> `$> git checkout --theirs {file_name or .(all)}` <br> then <br> `$> git add {file_name or .(all)}` <br> `$> git merge --continue` |Merge easy solve conflict command line|
 |Git Rebase master in feature <br>`$> git checkout feature` <br> `$> git rebase master` <br> if conflict <br> To select the changes done in master <br> `$> git checkout --ours {file_name or .(all)}` <br> To select the changes done in feature <br> `$> git checkout --theirs {file_name or .(all)}` <br> then <br> `$> git add {file_name or .(all)}` <br> `$> git rebase --continue` |Rebase easy solve conflict command line| 
 |`$> git config --global alias.st "status"`|Create alias|
-|`$> git stash save -u name_relevante_for_identification`|Create the stash with an identification name |
+|`$> git stash save -u name_relevante_for_identification`|Create the stash with an identification name. (-u or --include-untracked)  |
+|`$> git stash list`| To see the stash list|
+|`$> git stash pop`  \|\|  `$>git stash pop stash@{n} `|Apply the changes stashed and remove from stash list. `stash@{n}` choose N when more the one stash in the list|
+|`$> git stash apply`  \|\|  `$>git stash apply stash@{n} `| Apply the changes and keep it in the stash list. `stash@{n}` choose N when more the one stash in the list|
+|`$> git stash show`  \|\|  `$>git stash show -p `| See differences and `-p or --patch`  |
 |`$> git reset HEAD -- <file or directory>`<br> `$> git restore --staged <file or directory>`|If you need to remove a single file from the staging area. Keep the changes|
 |`$> git init`<br>`$> git add . `<br>`$> git commit -m ""`<br>`$> git remote add origin <URL.git>`<br>`$> git branch --set-upstream-to=origin/<branch> <branch>`<br>`$> git pull --rebase` <br> `$> git push`|Push code to new repository|
 |`$> git fetch -p (prune)`|Remove ref for local branch not in remote |
