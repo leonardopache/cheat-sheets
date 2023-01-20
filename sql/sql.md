@@ -126,3 +126,12 @@ WHERE
    table_name = 'photo_type';
 ```
 ----
+
+###### SQL Substring update
+```sql
+-- Start from 1 the text lenth
+SELECT 
+	substring(s.name, 1, 1) as part1,  
+	substring(s.name, 2) as part2
+FROM MyTable s
+```

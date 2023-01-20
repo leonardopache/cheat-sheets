@@ -8,7 +8,12 @@
 	3. [@JsonDeserialize(using = CustomDeserializer.class)](#JsonDeserialize)
 4. [Junit Jupter](#junitjupter)
 	1. [@ParameterizedTest unit test](#parameterizedTest)
-	2. 
+	2. [@Assertions](#Assertions)
+	3. [@Stepverifier](#Stepverifier)
+5. [Spring Reactive Webflux](#Webflux)
+6. [Spring Service factory](#serviceFactory)
+
+
 
 ----
 _My notes for the future_
@@ -175,22 +180,139 @@ void getNetworkObjects(Object expectedResponse, String key, String value) {
 ...
 }
 ```
-* B
+* Annotation Value source
 ```Java
+@ParameterizedTest 
+@ValueSource(strings = {"", " ", null})
+void isStringTest(String value) {
+...
+}
 ```
-* C
+* CSV Source
 ```Java
+@ParameterizedTest  
+@CsvSource({  
+        ",false",  
+        "'',false",  
+        "-1,false",  
+        "33,false",  
+        "23,true"})  
+void isStringWhatExpectedTest(String value, boolean expected) {
+...
+}
 ```
-* D
+
+###### #Assertions 
 ```Java
+Throwable runtime = Assertions.assertThrows(  
+        ApiBadRequestException.class,  
+        () -> ruleDocService.searchNetworkObjects(filterKey, value));  
+Assertions.assertEquals(ApiBadRequestException.class, runtime.getClass());
+```
+
+```Java
+Assertions.assertAll(  
+        () -> Assertions.assertNotNull("true"),
+        () -> Assertions.assertNull(null)
+);
+```
+
+###### #Stepverifier
+```Java 
+// On ERROR
+Mockito.when(teamRepository.findByName(Mockito.anyString()))
+	.thenReturn(Mono.empty());
+           
+StepVerifier
+           .create(teamService.findByName("some name"))
+           .expectErrorMatches(error -> error instanceof TeamServiceException)
+           .verify();
+    }
+
+// ExpectNext
+when(service.search(filterKey, value))
+	.thenReturn(arrayListOfA);
+
+StepVerifier.create(service.search(filterKey, value))  
+        .expectNext(arrayListOfA)  
+        .verifyComplete();
 ```
 
 
 ----
-### Webflux 
+###### #Webflux 
 - Mono 
 ```java
 // Convet Mono<List<Object>> to List<Object>
 List<Object> block = myService.MethReturMonoListObject().block();
 ```
 
+```Java 
+// Adapter Mono<List<ResponseData>> from Mono<List<T>> 
+Mono<List<ResponseData>> listMono = service.returnMonoListSomething(name, value)  
+        .log()  
+        .flatMapIterable(listSomething -> listSomething.stream()  
+                .map(ResponseDataMapper::map)  
+                .toList())  
+        .distinct()  
+        .collectList();
+```
+```Java
+// Mono.Zip 
+Mono.zip(
+		// First List to zip, List Of Two
+		listOne.stream()  
+        .map(itemListOne ->  
+                service.getMonoTwoFromItemListOne(itemListOne)  
+                    .doOnNext(two -> log.info("Retrieve Two Information :{}", two))  
+                    .map(Two::nameFromTwo))  
+        .toList(), // Return List<Mono<Two>> 
+        // Second List to zip, For block the first list and cast to List<Two>
+        // some magic to hold the execution until all items from first list is loaded
+        data ->  
+        Arrays.stream(data)  
+                .map(Two.class::cast)  
+                .collect(Collectors.toList()))
+        ) // This return Tuple
+```
+
+```Java
+public Mono<List<Response>> getDataFromIntegration(String Key, String value) {
+        return service.returnMonoListA(key, value) // return Mono<List<A>>
+                .log()
+                .flatMapIterable(a -> a.stream()
+                        .map(ResponseMapper::map)
+                        .toList())
+                .distinct()
+                .collectList();
+    } // Mapper A to Response
+```
+
+```Java
+// Convert Mono object of List to a Flux 
+Mono<List<String>> monoWithList = Mono.empty();  
+Flux<String> stringFlux = monoWithList  
+        .flatMapIterable(Function.identity());
+```
+
+###### #serviceFactory
+```Java
+@Service  
+public class ServiceFactory {  
+    private final Map<ServiceType, IService> servicesMap = new HashMap<>();  
+  
+    @Autowired  
+    public ServiceFactory(List<IService> services) {  
+        if (Objects.nonNull(services))  
+            services.forEach(service -> servicesMap.put(service.getType(), service));  
+        else            throw new RuntimeException("List of IServices not found: ");  
+    }  
+  
+    public IService getInstance(ServiceType serviceType) {  
+        IService serviceInstance = servicesMap.get(serviceType);  
+        if (Objects.isNull(serviceInstance))  
+            throw new RuntimeException("Service not found: " + serviceType);  
+        return serviceInstance;  
+    }  
+}
+```
