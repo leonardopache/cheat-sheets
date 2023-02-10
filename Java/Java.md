@@ -12,6 +12,8 @@
 	3. [@Stepverifier](#Stepverifier)
 5. [Spring Reactive Webflux](#Webflux)
 6. [Spring Service factory](#serviceFactory)
+7. [Design](#Design)
+	1. [Abstract Class Injection](#abstractClassInjection)
 
 
 
@@ -34,9 +36,96 @@ System.out.println(n);
 ```
 
 ###### #stream
+```Java 
+/**  
+ * Code to transformation of List<A<B>> to List<B<A>>  
+ *     [A1[B1], A2[B1, B2], A3[B1, B2, B3]] => [B1[A1, A2, A3], B2[A2, A3], B3[A3]]
+ * 
+ */
+Map<Policy, List<Rule>> policiesAndRulesMap = allRuleFromAPI.stream()  
+        .map(ruleAPI ->  
+                ruleAPI.getListOfPolicyFromAPI.stream()  
+                        .flatMap(policyFromAPI -> Stream.of(PolicyMapper.map(policyFromAPI)))
+                        .collect(Collectors.toMap(
+                        k -> k, 
+                        v -> Arrays.asList(RuleMapper.map(ruleAPI)))))
+        .flatMap(map -> map.entrySet().stream()) // Stream of map to Stream of entries
+/** 
+*	PART 1  
+*     ([B1], [A1]),  
+*     ([B2], [A1]),  
+*     ([B2], [A2]),  
+*     ([B3], [A1]),  
+*     ([B3], [A2]),  
+*     ([B3], [A3])
+*/
+        .collect(Collectors.toMap(
+		        Entry::getKey, 
+		        v -> new ArrayList<>(v.getValue()),  
+                (left, right) -> {  
+                    left.addAll(right);  
+                    return left;  
+                })
+        ); // Group the entry::key and merge values with the same key 
+/**
+*  PART 2  
+*     ([B1], [A1]),  
+*     ([B2], [A1], [A2]),  
+*     ([B3], [A1]), [A2]), [A3])
+*/
+
+List<Policy> policiesResponse = policiesAndRulesMap.entrySet()  
+        .stream()  
+        .flatMap(policyAPIListEntry -> {  
+            policyListEntry.getKey().setRules(policyListEntry.getValue());  
+            return Stream.of(policyListEntry);  
+        })  
+        .flatMap(entry -> Stream.of(entry.getKey()))  // get only key's
+        .toList();
+/** 
+*  PART 3  
+*      [B1[A1], B2[A1,A2], B3[A1,A2,A3]
+*/
+```
+
+```Java
+// SummaryStatistics to get Max and Min for a list
+LongSummaryStatistics collect = bookings.stream()  
+        .sorted(Comparator.comparing(Booking::getDate))  
+        .map(Booking::getDate)  
+        .map(LocalDate::toEpochDay)  
+        .collect(
+	        Collectors.summarizingLong(Long::longValue)
+	    );
+	    
+LocalDate from = LocalDate.ofEpochDay(collect.getMin());  
+LocalDate to = LocalDate.ofEpochDay(collect.getMax());
+```
+
+```Java
+// PartitioningBy to collect
+Map<Boolean, List<Boolean>> collect = dates.stream()  
+        .flatMap(date -> Stream.of(Objects.nonNull(date)))  
+        .collect(
+	        Collectors.partitioningBy(booking -> Objects.nonNull(booking))
+        );
+```
+
+```java
+// Stream to reduce
+BigDecimal sumEasy = Stream.iterate(BigDecimal.ZERO, z -> z.add(BigDecimal.ONE))  
+        .limit(20)  
+        .reduce(BigDecimal.ZERO, BigDecimal::add);  
+  
+BigDecimal sumComplex = Stream.iterate(BigDecimal.ZERO, z -> z.add(BigDecimal.ONE))  
+        .limit(20)  
+        .reduce(BigDecimal.ZERO, (a, b) -> a.add(b), BigDecimal::add);
+```
+
 
 ###### #jackson
-###### #JsonRootName
+###### #JsonRootName 
+
 ```JSON
 {
 	"wrapper_element": {
@@ -305,7 +394,8 @@ public class ServiceFactory {
     public ServiceFactory(List<IService> services) {  
         if (Objects.nonNull(services))  
             services.forEach(service -> servicesMap.put(service.getType(), service));  
-        else            throw new RuntimeException("List of IServices not found: ");  
+        else            
+	        throw new RuntimeException("List of IServices not found: ");  
     }  
   
     public IService getInstance(ServiceType serviceType) {  
@@ -314,5 +404,43 @@ public class ServiceFactory {
             throw new RuntimeException("Service not found: " + serviceType);  
         return serviceInstance;  
     }  
+}
+```
+
+
+###### #Design  
+###### #abstractClassInjection
+**Setter Injection**
+```Java 
+public abstract class BallService {
+
+    private LogRepository logRepository;
+
+	// Should use FINAL keyword to avoid override from subclass
+    @Autowired
+    public final void setLogRepository(LogRepository logRepository) {
+        this.logRepository = logRepository;
+    }
+}
+```
+**Constructor Injection**
+```Java
+// Abstract class 
+public abstract class BallService {
+
+    private RuleRepository ruleRepository;
+
+    public BallService(RuleRepository ruleRepository) {
+        this.ruleRepository = ruleRepository;
+    }
+}
+ // Subclass implementation
+@Component
+public class BasketballService extends BallService {
+
+    @Autowired
+    public BasketballService(RuleRepository ruleRepository) {
+        super(ruleRepository);
+    }
 }
 ```
